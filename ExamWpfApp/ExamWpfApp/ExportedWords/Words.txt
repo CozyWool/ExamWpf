@@ -1,0 +1,4 @@
+привет: hi, hello
+Hello: Привет, Здравствуйте
+пока: bye, goodbye
+человек: human

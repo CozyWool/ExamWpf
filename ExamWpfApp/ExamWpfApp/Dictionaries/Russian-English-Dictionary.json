@@ -1,0 +1,42 @@
+{
+  "Dictionary": [
+    {
+      "Word": "привет",
+      "Translation": [
+        "what's up",
+        "hello"
+      ],
+      "FromLanguage": "Russian",
+      "ToLanguage": "English"
+    },
+    {
+      "Word": "здарова",
+      "Translation": [
+        "hey",
+        "what's up"
+      ],
+      "FromLanguage": "Russian",
+      "ToLanguage": "English"
+    },
+    {
+      "Word": "пока",
+      "Translation": [
+        "bye",
+        "goodbye",
+        "bye-bye"
+      ],
+      "FromLanguage": "Russian",
+      "ToLanguage": "English"
+    },
+    {
+      "Word": "человек",
+      "Translation": [
+        "human"
+      ],
+      "FromLanguage": "Russian",
+      "ToLanguage": "English"
+    }
+  ],
+  "FromLanguage": "Russian",
+  "ToLanguage": "English"
+}
