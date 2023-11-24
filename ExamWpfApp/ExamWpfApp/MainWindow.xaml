@@ -3,18 +3,94 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ExamWpfApp"
+        xmlns:viewModels="clr-namespace:ExamWpfApp.ViewModels"
         mc:Ignorable="d"
-        Title="Словарь" Height="450" Width="800">
+        Title="Словарь"
+        Height="450" Width="800"
+        d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Width" Value="350" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="Словарь"
+                   TextAlignment="Center"
+                   FontWeight="Bold"
+                   FontSize="25" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="0.1*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Поиск: " Margin="5" Padding="0,5" />
+            <TextBox Grid.Column="1" Name="FindTextBox" Margin="5" Padding="0,5" />
+            <Button Grid.Column="2" Content="Найти" Width="Auto" Command="{Binding FindCommand}"
+                    CommandParameter="{Binding ElementName=FindTextBox, Path=Text  }" />
+        </Grid>
         
+        <Grid Grid.Row="2" Margin="10,5,5,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Слово" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="Переводы(Разделять запятой!)" FontWeight="Bold" />
+            <TextBlock Grid.Column="2" Text="Удалить" FontWeight="Bold" />
+            <TextBlock Grid.Column="3" Text="Экспортировать" FontWeight="Bold" />
+        </Grid>
+        <ListBox Grid.Row="3"
+                 ItemsSource="{Binding CurrentDictionary.DictionaryParts}"
+                 HorizontalContentAlignment="Stretch"
+                 Margin="5">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding Word}" Margin="5" />
+                        <TextBox Grid.Column="1" Text="{Binding ShowTranslations}" Margin="5"
+                                 ToolTip="Переводы нужно писать через запятую." />
+                        <Button Grid.Column="2" Content="Удалить"
+                                Width="100"
+                                Height="Auto"
+                                Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.RemoveWordCommand}"
+                                CommandParameter="{Binding}" />
+                        <Button Grid.Column="3" Content="Экспортировать"
+                                Width="100"
+                                Height="Auto"
+                                Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=DataContext.ExportWordCommand}"
+                                CommandParameter="{Binding}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
         
+        <WrapPanel Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Content="Создать словарь" Command="{Binding CreateDictionaryCommand}" />
+            <Button Content="Открыть существующий словарь" Command="{Binding LoadDictionaryCommand}" />
+            <Button Content="Добавить слово в словарь" Command="{Binding AddWordComamnd}" />
+            <Button Content="Сохранить словарь в файл" Command="{Binding SaveDictionaryCommand}" />
+            <Button Content="Выйти" Command="{Binding ExitCommand}" Width="710" />
+        </WrapPanel>
+
     </Grid>
 </Window>

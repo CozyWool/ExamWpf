@@ -1,47 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using ExamWpfApp.Models.Enums;
 using Newtonsoft.Json;
 
 namespace ExamWpfApp.Models.Dictionary;
 
-public class LanguageDictionary
+public class LanguageDictionary : INotifyPropertyChanged
 {
     [JsonProperty("Dictionary")]
-    private readonly List<DictionaryPart> dictionary;
+    private readonly ObservableCollection<DictionaryPart> _dictionary;
 
-    public LanguageTypes FromLanguage { get; }
-    public LanguageTypes ToLanguage { get; }
+    private LanguageTypes _fromLanguage;
+    private LanguageTypes _toLanguage;
 
-    public List<DictionaryPart> GetDictionary() => dictionary;
+    public LanguageTypes FromLanguage
+    {
+        get => _fromLanguage;
+        set
+        {
+            if (Equals(value, _fromLanguage))
+                return;
+            _fromLanguage = value;
+            OnPropertyChanged();
+        }
+    }
 
-    [System.Text.Json.Serialization.JsonConstructor]
-    public LanguageDictionary(List<DictionaryPart> dictionary, LanguageTypes fromLanguage, LanguageTypes toLanguage)
+    public LanguageTypes ToLanguage
+    {
+        get => _toLanguage;
+        set
+        {
+            if (Equals(value, _toLanguage))
+                return;
+            _toLanguage = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public ObservableCollection<DictionaryPart> DictionaryParts => _dictionary;
+
+
+    [JsonConstructor]
+    public LanguageDictionary(ObservableCollection<DictionaryPart> dictionary, LanguageTypes fromLanguage, LanguageTypes toLanguage)
     {
         FromLanguage = fromLanguage;
         ToLanguage = toLanguage;
-        this.dictionary = dictionary ?? new List<DictionaryPart>();
+        _dictionary = dictionary;
     }
-    public LanguageDictionary(LanguageTypes fromLanguage, LanguageTypes toLanguage) : this(null, fromLanguage, toLanguage) { }
-    public LanguageDictionary() : this(null, LanguageTypes.None, LanguageTypes.None) { }
+    public LanguageDictionary(LanguageTypes fromLanguage, LanguageTypes toLanguage) : this(new ObservableCollection<DictionaryPart>(), fromLanguage, toLanguage) { }
+    public LanguageDictionary() : this(new ObservableCollection<DictionaryPart>(), LanguageTypes.None, LanguageTypes.None) { }
 
     public void AddWord(DictionaryPart value)
     {
         if (value.FromLanguage != FromLanguage && value.ToLanguage != ToLanguage)
             throw new Exception($"Слово {value} не может быть добавлено в словарь из-за несоотвествия языков!");
 
-        if (dictionary.Contains(value))
-            dictionary.Find(dictPart => dictPart.Word == value.Word)
-                      .AddTranslation(value.Translation);
+        if (DictionaryParts.Contains(value))
+        {
+            DictionaryParts.FirstOrDefault(dictPart => dictPart.Word == value.Word)
+                ?.AddTranslation(value.Translation);
+        }
         else
-            dictionary.Add(value);
+        {
+            DictionaryParts.Add(value);
+        }
     }
 
     public void RemoveWord(string word)
     {
-        if (FindWord(word, out DictionaryPart dictPart) && dictionary.Remove(dictPart))
+        if (FindWord(word, out var dictPart) && DictionaryParts.Remove(dictPart))
             return;
         else
             throw new Exception($"Ошибка в удалении слова {word}!");
@@ -54,13 +86,13 @@ public class LanguageDictionary
     /// <param name="result">Результат поиска</param>
     public bool FindWord(string word, out DictionaryPart result)
     {
-        result = dictionary.Find(dictPart => dictPart.Word == word);
+        result = DictionaryParts.FirstOrDefault(dictPart => dictPart.Word == word);
         return result != null;
     }
     public bool FindWordsByTranslation(string translation, out List<DictionaryPart> result)
     {
-        result = dictionary.Where(dictPart => dictPart.Translation.Contains(translation)).ToList();
-        return result != null;
+        result = DictionaryParts.Where(dictPart => dictPart.Translation.Contains(translation)).ToList();
+        return result.Count > 0;
     }
     public void ReplaceWord(string oldWord, string newWord)
     {
@@ -69,16 +101,16 @@ public class LanguageDictionary
     }
     public bool DeleteWord(string word)
     {
-        if (FindWord(word, out DictionaryPart dictPart))
-        {
-            return dictionary.Remove(dictPart);
-        }
-        return false;
+        return FindWord(word, out DictionaryPart dictPart) && DictionaryParts.Remove(dictPart);
+    }
+    public bool DeleteWord(DictionaryPart dictionaryPartToDelete)
+    {
+        return DictionaryParts.Remove(dictionaryPartToDelete);
     }
     public void ReplaceTranslation(string oldTranslation, string newTranslation)
     {
         FindWordsByTranslation(oldTranslation, out var resultList);
-        foreach (DictionaryPart dictPart in dictionary.Where(result => resultList.Contains(result)))
+        foreach (DictionaryPart dictPart in DictionaryParts.Where(result => resultList.Contains(result)))
         {
             for (int i = 0; i < dictPart.Translation.Count; i++)
             {
@@ -119,7 +151,7 @@ public class LanguageDictionary
     {
         get
         {
-            return dictionary.Where(dictPart => dictPart.Word == word)
+            return DictionaryParts.Where(dictPart => dictPart.Word == word)
                              .SelectMany(dictPart => dictPart.Translation)
                              .ToList();
         }
@@ -127,10 +159,17 @@ public class LanguageDictionary
     public override string ToString()
     {
         StringBuilder sb = new($"\n\t{FromLanguage}-{ToLanguage} словарь\n");
-        foreach (var dictionaryPart in dictionary)
+        foreach (var dictionaryPart in DictionaryParts)
         {
             sb.AppendLine(dictionaryPart.ToString());
         }
         return sb.ToString();
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

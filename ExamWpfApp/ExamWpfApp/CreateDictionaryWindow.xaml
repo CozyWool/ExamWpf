@@ -1,0 +1,60 @@
+﻿<Window x:Class="ExamWpfApp.CreateDictionaryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:viewModels="clr-namespace:ExamWpfApp.ViewModels"
+        xmlns:enums="clr-namespace:ExamWpfApp.Models.Enums"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Создать словарь" Width="250"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        d:DataContext="{d:DesignInstance viewModels:CreateDictionaryViewModel}">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Margin" Value="5" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Margin" Value="0,5,5,5" />
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Width" Value="50" />
+        </Style>
+        <ObjectDataProvider x:Key="DataFromEnum"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="enums:LanguageTypes" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="Первый язык: " />
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Text="Второй язык: " />
+
+        <ComboBox Grid.Row="0" Grid.Column="1"
+                  ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
+                  SelectedItem="{Binding Dictionary.FromLanguage}" />
+        <ComboBox Grid.Row="1" Grid.Column="1"
+                  ItemsSource="{Binding Source={StaticResource DataFromEnum}}"
+                  SelectedItem="{Binding Dictionary.ToLanguage}" />
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Content="OK" Command="{Binding OkCommand}" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>
